@@ -1,7 +1,7 @@
 /**
  * @TODO get a reference to the Firebase Database object
  */
-
+const database = firebase.database().ref();
 /**
  * @TODO get const references to the following elements:
  *      - div with id #all-messages
@@ -10,6 +10,16 @@
  *      - button with id #send-btn and the updateDB
  *        function as an onclick event handler
  */
+const allMessages = document.getElementById("all-messages");
+const usernameElem = document.getElementById("username");
+const emailElem = document.getElementById("email");
+const messageElem = document.getElementById("message");
+const profileElem = document.getElementById("profile");
+
+const sendBtn = document.getElementById("send-btn");
+
+sendBtn.onclick = updateDB;
+
 
 /**
  * @TODO create a function called updateDB which takes
@@ -24,11 +34,24 @@
 
 function updateDB(event) {
   // Prevent default refresh
+  event.preventDefault();
   // Create data object
+  const date = new Date();
+
+  const data = {
+    PROFILE: profileElem.value,
+    USERNAME: usernameElem.value,
+    EMAIL: emailElem.value,
+    MESSAGE: messageElem.value,
+    DATE: (date.getMonth() + 1) + "/" + (date.getDate()) + "/" + (date.getFullYear()),
+    TIME: (date.getHours()) + ":" + (date.getMinutes()) + ":" + (date.getSeconds()),
+  }
   // console.log the object
   // GET *PUSH* PUT DELETE
   // Write to our database
+  database.push(data);
   // Reset message
+  messageElem.value = "";
 }
 
 /**
@@ -36,7 +59,7 @@ function updateDB(event) {
  * handler for the "child_added" event on the database
  * object
  */
-
+database.on('child_added', addMessageToBoard);
 /**
  * @TODO create a function called addMessageToBoard that
  * takes one parameter rowData which:
@@ -50,10 +73,14 @@ function updateDB(event) {
 
 function addMessageToBoard(rowData) {
   // Store the value of rowData inside object named 'data'
+  const data = rowData.val();
   // console.log data
+  console.log(data);
   // Create a variable named singleMessage
+  let singleMessage = makeSingleMessageHTML(data.PROFILE, data.USERNAME, data.EMAIL, data.MESSAGE, data.DATE, data.TIME);
   // that stores function call for makeSingleMessageHTML()
   // Append the new message HTML element to allMessages
+  allMessages.appendChild(singleMessage);
 }
 
 /**
@@ -74,13 +101,44 @@ function addMessageToBoard(rowData) {
  *      - returns the parent div
  */
 
-function makeSingleMessageHTML(usernameTxt, messageTxt) {
+function makeSingleMessageHTML(profileImg, usernameTxt, emailTxt, messageTxt, dateTxt, timeTxt) {
   // Create Parent Div
+  let parentDiv = document.createElement('div');
   // Add Class name .single-message
+  parentDiv.classList.add("single-message")
   // Create Username P Tag
+  let usernamePTag = document.createElement('p');
   // Append username
+  usernamePTag.innerHTML = usernameTxt;
+  usernamePTag.classList.add("single-message-username");
+
+  let emailPTag = document.createElement('p');
+  emailPTag.innerHTML = emailTxt;
+  emailPTag.classList.add("single-message-email");
   // Create message P Tag
+  let messagePTag = document.createElement('p');
+  messagePTag.innerHTML = messageTxt;
+
+  let datePTag = document.createElement('p');
+  datePTag.innerHTML = dateTxt;
+  datePTag.classList.add("single-message-date");
+
+  let timePTag = document.createElement('p');
+  timePTag.innerHTML = timeTxt;
+  timePTag.classList.add("single-message-time");
+
+  let profileImgTag = document.createElement('img');
+  profileImgTag.src = profileImg;
+  profileImgTag.classList.add("single-message-img");
+
   // Return Parent Div
+  parentDiv.appendChild(profileImgTag);
+  parentDiv.appendChild(usernamePTag);
+  parentDiv.appendChild(emailPTag);
+  parentDiv.appendChild(messagePTag);
+  parentDiv.appendChild(datePTag);
+  parentDiv.appendChild(timePTag);
+  return parentDiv;
 }
 
 /**
